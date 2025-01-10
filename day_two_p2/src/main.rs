@@ -32,69 +32,51 @@ fn count_safe_levels(levels: Vec<Vec<i32>>) -> i32 {
     let mut safe_count = 0;
     for level in levels {
         let n = level.len();
-        let mut sorted_level = level.clone();
-        sorted_level.sort();
-        if check_valid(&sorted_level) {
-            if level[0] > level[n - 1] {
-                safe_count += check_decreasing(&level);
+        if level[0] > level[n - 1] {
+            if check_valid_decreasing(&level) {
+                safe_count += 1;
             } else {
-                safe_count += check_increasing(&level);
+                for idx in 0..level.len() {
+                    let mut level_new = level.clone();
+                    level_new.remove(idx);
+                    if check_valid_decreasing(&level_new) {
+                        safe_count += 1;
+                        break;
+                    }
+                }
+            }
+        } else {
+            if check_valid_increasing(&level) {
+                safe_count += 1;
+            } else {
+                for idx in 0..level.len() {
+                    let mut level_new = level.clone();
+                    level_new.remove(idx);
+                    if check_valid_increasing(&level_new) {
+                        safe_count += 1;
+                        break;
+                    }
+                }
             }
         }
     }
     safe_count
 }
 
-fn check_valid(level: &Vec<i32>) -> bool {
-    let mut dampener = 0;
+fn check_valid_decreasing(level: &Vec<i32>) -> bool {
     for i in 0..level.len() - 1 {
-        if level[i] >= level[i + 1] {
-            dampener += 1;
-            if dampener > 1 {
-                return false;
-            }
+        if level[i] <= level[i + 1] || level[i + 1] < level[i] - 3 {
+            return false;
         }
     }
-
     true
 }
 
-fn check_decreasing(level: &Vec<i32>) -> i32 {
-    let mut dampener = 0;
-    let mut l = 0;
-    let mut r = 1;
-
-    while r < level.len() {
-        if level[l] <= level[r] || level[r] < level[l] - 3 {
-            dampener += 1;
-            if dampener > 1 {
-                return 0;
-            }
-            r += 1;
-        } else {
-            r += 1;
-            l = r - 1;
+fn check_valid_increasing(level: &Vec<i32>) -> bool {
+    for i in 0..level.len() - 1 {
+        if level[i] >= level[i + 1] || level[i + 1] > level[i] + 3 {
+            return false;
         }
     }
-    1
-}
-
-fn check_increasing(level: &Vec<i32>) -> i32 {
-    let mut dampener = 0;
-    let mut l = 0;
-    let mut r = 1;
-
-    while r < level.len() {
-        if level[l] >= level[r] || level[r] > level[l] + 3 {
-            dampener += 1;
-            if dampener > 1 {
-                return 0;
-            }
-            r += 1;
-        } else {
-            r += 1;
-            l = r - 1;
-        }
-    }
-    1
+    true
 }
